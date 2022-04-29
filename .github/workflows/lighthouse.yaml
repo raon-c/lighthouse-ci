@@ -5,6 +5,7 @@ jobs:
     name: Lighthouse
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Audit URLs using Lighthouse
         uses: treosh/lighthouse-ci-action@v9
         with:
