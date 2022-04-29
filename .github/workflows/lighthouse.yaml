@@ -5,16 +5,12 @@ jobs:
     name: Lighthouse
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js 17.3.1
-        uses: actions/setup-node@v1
+      - name: Audit URLs using Lighthouse
+        uses: treosh/lighthouse-ci-action@v9
         with:
-          node-version: 17.3.1
-      - name: npm install, build
-        run: |
-          npm ci
-          npm run build
-      - name: run Lighthouse CI
-        run: |
-          npm install -g @lhci/cli
-          lhci autorun || echo "LHCI failed!"
+          urls: |
+            https://example.com/
+            https://example.com/blog
+          budgetPath: ./budget.json # test performance budgets
+          uploadArtifacts: true # save results as an action artifacts
+          temporaryPublicStorage: true # upload lighthouse report to the temporary storage
