@@ -1,0 +1,28 @@
+name: Run lighthouse ci When Push
+on: [pull_request]
+jobs:
+  lhci:
+    name: Lighthouse
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js 17.3.1
+        uses: actions/setup-node@v1
+        with:
+          node-version: 17.3.1
+      - name: npm install, build, start
+        run: |
+          npm ci
+          npm run build
+          npm run start
+      - name: Generate Lighthouse Report
+        uses: justinribeiro/lighthouse-action@master
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          url: http://localhost:3000
+          wptConnectionSpeed: threegfast
+      - name: Saving Lighthouse Audit Artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: lighthouse-artifacts
+          path: "./results"
