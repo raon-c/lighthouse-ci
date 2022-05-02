@@ -1,0 +1,28 @@
+[
+  {
+    "url": "http://localhost:3000/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/raon.c/Desktop/lgtest/lhci_reports/_-2022_05_02_07_18_50-report.html",
+    "jsonPath": "/Users/raon.c/Desktop/lgtest/lhci_reports/_-2022_05_02_07_18_50-report.json",
+    "summary": {
+      "performance": 0.61,
+      "accessibility": 0.97,
+      "best-practices": 1,
+      "seo": 1,
+      "pwa": 0.3
+    }
+  },
+  {
+    "url": "http://localhost:3000/ci",
+    "isRepresentativeRun": true,
+    "htmlPath": "/Users/raon.c/Desktop/lgtest/lhci_reports/_ci-2022_05_02_07_18_59-report.html",
+    "jsonPath": "/Users/raon.c/Desktop/lgtest/lhci_reports/_ci-2022_05_02_07_18_59-report.json",
+    "summary": {
+      "performance": 0.64,
+      "accessibility": 0.92,
+      "best-practices": 1,
+      "seo": 0.82,
+      "pwa": 0.3
+    }
+  }
+]
