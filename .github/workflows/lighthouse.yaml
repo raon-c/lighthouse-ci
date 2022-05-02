@@ -1,5 +1,5 @@
 name: Run lighthouse ci When Push
-on: [push, pull_request]
+on: pull_request
 jobs:
   lhci:
     name: Lighthouse
@@ -61,8 +61,17 @@ jobs:
             console.log(github.event)
             console.log(context)
             github.issues.createComment({
-              issue_number: 32,
+              issue_number: 4,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comments
             })
+        - name: comment PR
+          uses: unsplash/comment-on-pr@v1.3.0
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          with:
+            msg: "Check out this message!"
+            check_for_duplicate_msg: false # OPTIONAL
+            delete_prev_regex_msg: "[0-9]" # OPTIONAL
+            duplicate_msg_pattern: "[A-Z]" # OPTIONAL
