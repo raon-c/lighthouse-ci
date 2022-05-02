@@ -19,14 +19,39 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: |
           npm install -g @lhci/cli
-          lhci autorun || echo "LHCI failed!"
-      - uses: actions/github-script@v3
+          lhci autorun
+      - name: Format lighthouse score
+        id: format_lighthouse_score
+        uses: actions/github-script@v3
         with:
           github-token: ${{secrets.TOKEN}}
           script: |
+            const results = require('./lhci_reports/manifest.json')
+
+            let comments = ""
+
+            results.forEach(result => {
+              const summary = result.summary;
+              const url = result.url;
+              const formatResult = (res) => Math.round((res * 100))
+              Object.keys(result).forEach(key => result[key] = formatResult(result[key]))
+              const score = res => res >= 90 ? '🟢' : res >= 50 ? '🟠' : '🔴'
+              const comment = [
+                  `⚡️ [Lighthouse report](${url}) for the changes in this PR:`,
+                  '| Category | Score |',
+                  '| --- | --- |',
+                  `| ${score(result.performance)} Performance | ${result.performance} |`,
+                  `| ${score(result.accessibility)} Accessibility | ${result.accessibility} |`,
+                  `| ${score(result['best-practices'])} Best practices | ${result['best-practices']} |`,
+                  `| ${score(result.seo)} SEO | ${result.seo} |`,
+                  `| ${score(result.pwa)} PWA | ${result.pwa} |`,
+                  ' ',
+              ].join('\n')
+              comments += comment + '\n'
+            })
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: 'Hello world'
+              body: comments
             });
