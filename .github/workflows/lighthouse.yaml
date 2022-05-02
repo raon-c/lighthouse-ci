@@ -87,7 +87,7 @@ jobs:
                 } |`,
                 " ",
               ].join("\n");
-              comments += comment + detail + "\n";
+              comments += comment + "\n" + detail + "\n";
             });
             core.setOutput('comments', comments)
       - name: comment PR
