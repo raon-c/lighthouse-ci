@@ -58,10 +58,19 @@ jobs:
               ].join("\n");
               comments += comment + "\n";
             });
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: issue_number,
-              body: comments
-            });
+            if (
+              github.context.payload.pull_request &&
+              github.context.payload.pull_request.comments_url &&
+              secret
+            ) {
+              await fetch(github.context.payload.pull_request.comments_url, {
+                method: 'post',
+                body: JSON.stringify({
+                  body: string,
+                }),
+                headers: {
+                  'content-type': 'application/json',
+                  authorization: `Bearer ${secret}`,
+                },
+              });
+            }
