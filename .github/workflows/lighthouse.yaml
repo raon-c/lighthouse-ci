@@ -58,6 +58,7 @@ jobs:
               ].join("\n");
               comments += comment + "\n";
             });
+            console.log(github)
             github.issues.createComment({
               issue_number: 32,
               owner: context.repo.owner,
