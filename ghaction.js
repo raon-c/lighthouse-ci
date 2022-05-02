@@ -29,9 +29,6 @@ results.forEach((result) => {
     `| ${score(summary.seo)} SEO | ${summary.seo} |`,
     `| ${score(summary.pwa)} PWA | ${summary.pwa} |`,
     " ",
-  ].join("\n");
-  const detail = [
-    `⚡️ Detail`,
     "| Category | Score |",
     "| --- | --- |",
     `| ${score(
@@ -58,9 +55,9 @@ results.forEach((result) => {
     )} Cumulative Layout Shift | ${
       audits["cumulative-layout-shift"].displayValue
     } |`,
-    " ",
   ].join("\n");
-  comments += comment + "\n" + detail + "\n";
+  const detail = [`⚡️ Detail`, " "].join("\n");
+  comments += comment + detail + "\n";
 });
 
 console.log(comments);
