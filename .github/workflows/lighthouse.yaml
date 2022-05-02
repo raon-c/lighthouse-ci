@@ -33,8 +33,9 @@ jobs:
             let comments = "";
 
             results.forEach((result) => {
-              const summary = result.summary;
-              const url = result.url;
+              const { summary, url, jsonPath } = result;
+              const s = JSON.parse(js.readFileSync(jsonPath));
+              console.log(s)
               const formatResult = (res) => Math.round(res * 100);
               Object.keys(summary).forEach(
                 (key) => (summary[key] = formatResult(summary[key]))

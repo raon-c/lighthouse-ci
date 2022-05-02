@@ -6,7 +6,7 @@ let comments = "";
 
 results.forEach((result) => {
   const { summary, url, jsonPath } = result;
-  console.log(jsonPath);
+  const s = JSON.parse(js.readFileSync(jsonPath));
   const formatResult = (res) => Math.round(res * 100);
   Object.keys(summary).forEach(
     (key) => (summary[key] = formatResult(summary[key]))
