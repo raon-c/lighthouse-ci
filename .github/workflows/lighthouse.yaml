@@ -22,7 +22,7 @@ jobs:
           lhci autorun
       - name: Format lighthouse score
         id: format_lighthouse_score
-        uses: actions/github-script@v3
+        uses: actions/github-script@v5
         with:
           github-token: ${{secrets.TOKEN}}
           script: |
@@ -58,8 +58,8 @@ jobs:
               ].join("\n");
               comments += comment + "\n";
             });
-            let issue_number = Number(fs.readFileSync('./pr_number'));
-            await github.rest.issues.createComment({
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: issue_number,
