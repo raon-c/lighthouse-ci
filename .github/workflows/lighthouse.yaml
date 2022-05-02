@@ -58,7 +58,7 @@ jobs:
               ].join("\n");
               comments += comment + "\n";
             });
-            console.log(github)
+            console.log(github.event)
             console.log(context.repo)
             github.issues.createComment({
               issue_number: 32,
