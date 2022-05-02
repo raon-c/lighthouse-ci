@@ -23,7 +23,7 @@ jobs:
       - name: GITHUB Comment
       - uses: actions/github-script@v3
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN}}
           script: |
             github.issues.createComment({
               issue_number: context.issue.number,
