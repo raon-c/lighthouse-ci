@@ -20,6 +20,15 @@ jobs:
         run: |
           npm install -g @lhci/cli
           lhci autorun
+      - name: comment PR
+        uses: unsplash/comment-on-pr@v1.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          msg: "Check out this message!"
+          check_for_duplicate_msg: false # OPTIONAL
+          delete_prev_regex_msg: "[0-9]" # OPTIONAL
+          duplicate_msg_pattern: "[A-Z]" # OPTIONAL
       - name: Format lighthouse score
         id: format_lighthouse_score
         uses: actions/github-script@v3
@@ -61,17 +70,8 @@ jobs:
             console.log(github.event)
             console.log(context)
             github.issues.createComment({
-              issue_number: 4,
+              issue_number: context.sha,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: comments
             })
-      - name: comment PR
-        uses: unsplash/comment-on-pr@v1.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          msg: "Check out this message!"
-          check_for_duplicate_msg: false # OPTIONAL
-          delete_prev_regex_msg: "[0-9]" # OPTIONAL
-          duplicate_msg_pattern: "[A-Z]" # OPTIONAL
