@@ -22,9 +22,9 @@ jobs:
           lhci autorun
       - name: Format lighthouse score
         id: format_lighthouse_score
-        uses: actions/github-script@v5
+        uses: actions/github-script@v3
         with:
-          github-token: ${{secrets.TOKEN}}
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const fs = require('fs');
 
@@ -58,8 +58,9 @@ jobs:
               ].join("\n");
               comments += comment + "\n";
             });
-            core.setOutput('comments', comments)
-      - uses: github-actions-up-and-running/pr-comment@v1.0.0
-        with:
-          repo-token: ${{ secrets.TOKEN }}
-          message: ${{steps.format_lighthouse_score.output.comments}}
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comments
+            })
