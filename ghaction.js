@@ -5,9 +5,8 @@ const results = JSON.parse(fs.readFileSync("./lhci_reports/manifest.json"));
 let comments = "";
 
 results.forEach((result) => {
-  console.log(result);
-  const summary = result.summary;
-  const url = result.url;
+  const { summary, url, jsonPath } = result;
+  console.log(jsonPath);
   const formatResult = (res) => Math.round(res * 100);
   Object.keys(summary).forEach(
     (key) => (summary[key] = formatResult(summary[key]))
