@@ -28,7 +28,7 @@ jobs:
           script: |
             const fs = require('fs');
 
-            const results = JSON.parse(fs.readFileSync("./lhci_reports/manifest.json"));
+            const results = JSON.parse(fs.readFileSync("/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/manifest.json"));
 
             let comments = "";
 
