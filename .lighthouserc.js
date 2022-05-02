@@ -2,7 +2,7 @@ module.exports = {
   ci: {
     collect: {
       startServerCommand: "npm run start", // 서버를 키는 명령어
-      url: ["http://localhost:3000"],
+      url: ["http://localhost:3000", "http://localhost:3000/ci"],
       collect: {
         numberOfRuns: 1, // Lighthouse 가 5번 실행됨
       },

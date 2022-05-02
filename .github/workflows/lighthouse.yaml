@@ -33,7 +33,6 @@ jobs:
             let comments = "";
 
             results.forEach((result) => {
-              console.log(result);
               const summary = result.summary;
               const url = result.url;
               const formatResult = (res) => Math.round(res * 100);
