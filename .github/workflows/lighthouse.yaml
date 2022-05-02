@@ -66,11 +66,11 @@ jobs:
               await fetch(github.context.payload.pull_request.comments_url, {
                 method: 'post',
                 body: JSON.stringify({
-                  body: string,
+                  body: comments,
                 }),
                 headers: {
                   'content-type': 'application/json',
-                  authorization: `Bearer ${secret}`,
+                  authorization: `Bearer ${{secrets.TOKEN}}`,
                 },
               });
             }
