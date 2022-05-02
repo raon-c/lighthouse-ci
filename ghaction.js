@@ -6,9 +6,11 @@ let comments = "";
 
 results.forEach((result) => {
   const { summary, url, jsonPath } = result;
-  const s = JSON.parse(fs.readFileSync(jsonPath));
-  console.log(s);
+  const details = JSON.parse(fs.readFileSync(jsonPath));
   const formatResult = (res) => Math.round(res * 100);
+
+  const { audits } = details;
+
   Object.keys(summary).forEach(
     (key) => (summary[key] = formatResult(summary[key]))
   );
@@ -28,7 +30,19 @@ results.forEach((result) => {
     `| ${score(summary.pwa)} PWA | ${summary.pwa} |`,
     " ",
   ].join("\n");
-  comments += comment + "\n";
+  const detail = [
+    `⚡️ Detail`,
+    "| Category | Score |",
+    "| --- | --- |",
+    `| First Contentful Pain | ${audits["first-contentful-paint"].displayValue} |`,
+    `| Time to Interactive | ${audits.interactive.displayValue} |`,
+    `| SpeedIndex | ${audits["speed-index"].displayValue} |`,
+    `| Total Blocking Time | ${audits["total-blocking-time"].displayValue} |`,
+    `| Largest Contentful Pain | ${audits["largest-contentful-paint"].displayValue} |`,
+    `| Cumulative Layout Shift | ${audits["cumulative-layout-shift"].displayValue} |`,
+    " ",
+  ].join("\n");
+  comments += comment + "\n" + detail + "\n";
 });
 
 console.log(comments);
