@@ -58,9 +58,10 @@ jobs:
               ].join("\n");
               comments += comment + "\n";
             });
-            github.issues.createComment({
-              issue_number: context.issue.number,
+            let issue_number = Number(fs.readFileSync('./pr_number'));
+            await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
+              issue_number: issue_number,
               body: comments
             });
