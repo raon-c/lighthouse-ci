@@ -58,19 +58,8 @@ jobs:
               ].join("\n");
               comments += comment + "\n";
             });
-            if (
-              github.context.payload.pull_request &&
-              github.context.payload.pull_request.comments_url &&
-              secret
-            ) {
-              await fetch(github.context.payload.pull_request.comments_url, {
-                method: 'post',
-                body: JSON.stringify({
-                  body: comments,
-                }),
-                headers: {
-                  'content-type': 'application/json',
-                  authorization: `Bearer ${{secrets.TOKEN}}`,
-                },
-              });
-            }
+            core.setOutput('comments', comments)
+      - uses: github-actions-up-and-running/pr-comment@v1.0.0
+        with:
+          repo-token: ${{ secrets.TOKEN }}
+          message: ${{format_lighthouse_score.output.comments}}
