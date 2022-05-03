@@ -99,3 +99,9 @@ jobs:
           check_for_duplicate_msg: false # OPTIONAL
           delete_prev_regex_msg: "[0-9]" # OPTIONAL
           duplicate_msg_pattern: "[A-Z]" # OPTIONAL
+      - name: deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.TOKEN }}
+          publish_dir: ./lhci_reports
+          keep_files: true
