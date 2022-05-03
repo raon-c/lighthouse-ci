@@ -33,7 +33,7 @@ jobs:
             let comments = "";
 
             results.forEach((result) => {
-              const { summary, url, jsonPath } = result;
+              const { summary, url, jsonPath, htmlPath } = result;
               const details = JSON.parse(fs.readFileSync(jsonPath));
               const formatResult = (res) => Math.round(res * 100);
 
@@ -44,7 +44,7 @@ jobs:
               );
               const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
               const comment = [
-                `⚡️ Lighthouse report! ${url} score in this PR:`,
+                `⚡️ Lighthouse report! ${url} score in this PR, See more [Detail](https://raon-c.github.io/lighthouse-ci/${htmlPath})`,
                 "| Category | Score |",
                 "| --- | --- |",
                 `| ${score(summary.performance)} Performance | ${summary.performance} |`,
