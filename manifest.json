@@ -2,10 +2,10 @@
   {
     "url": "http://localhost:3000/",
     "isRepresentativeRun": true,
-    "htmlPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_-report.html",
-    "jsonPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_-report.json",
+    "htmlPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_-2022_05_03_05_20_49-report.html",
+    "jsonPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_-2022_05_03_05_20_49-report.json",
     "summary": {
-      "performance": 1,
+      "performance": 0.9,
       "accessibility": 0.97,
       "best-practices": 1,
       "seo": 1,
@@ -15,10 +15,10 @@
   {
     "url": "http://localhost:3000/ci",
     "isRepresentativeRun": true,
-    "htmlPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_ci-report.html",
-    "jsonPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_ci-report.json",
+    "htmlPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_ci-2022_05_03_05_21_00-report.html",
+    "jsonPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_ci-2022_05_03_05_21_00-report.json",
     "summary": {
-      "performance": 0.99,
+      "performance": 1,
       "accessibility": 0.92,
       "best-practices": 1,
       "seo": 0.82,
