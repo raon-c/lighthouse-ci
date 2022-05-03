@@ -1,5 +1,5 @@
 name: Run lighthouse ci When Push
-on: [push]
+on: pull_request
 jobs:
   lhci:
     name: Lighthouse
@@ -24,25 +24,30 @@ jobs:
         id: format_lighthouse_score
         uses: actions/github-script@v3
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{secrets.TOKEN}}
           script: |
-            const fs = require('fs');
+            const fs = require("fs");
 
-            const results = JSON.parse(fs.readFileSync("/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/manifest.json"));
+            const results = JSON.parse(fs.readFileSync("./lhci_reports/manifest.json"));
 
             let comments = "";
 
             results.forEach((result) => {
-              console.log(result);
-              const summary = result.summary;
-              const url = result.url;
+              const { summary, url, jsonPath, htmlPath } = result;
+              const details = JSON.parse(fs.readFileSync(jsonPath));
               const formatResult = (res) => Math.round(res * 100);
+
+              const { audits } = details;
+
+              const parsedHtmlPath = htmlPath.split("/");
+              const path = parsedHtmlPath[parsedHtmlPath.length - 1];
+
               Object.keys(summary).forEach(
                 (key) => (summary[key] = formatResult(summary[key]))
               );
               const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
               const comment = [
-                `⚡️ [Lighthouse report](${url}) for the changes in this PR:`,
+                `⚡️ Lighthouse report! ${url} score in this PR, See more [Detail](https://raon-c.github.io/lighthouse-ci/${path})`,
                 "| Category | Score |",
                 "| --- | --- |",
                 `| ${score(summary.performance)} Performance | ${summary.performance} |`,
@@ -56,11 +61,50 @@ jobs:
                 `| ${score(summary.pwa)} PWA | ${summary.pwa} |`,
                 " ",
               ].join("\n");
-              comments += comment + "\n";
+              const detail = [
+                "| Category | Score |",
+                "| --- | --- |",
+                `| ${score(
+                  audits["first-contentful-paint"].score * 100
+                )} First Contentful Pain | ${
+                  audits["first-contentful-paint"].displayValue
+                } |`,
+                `| ${score(audits.interactive.score * 100)} Time to Interactive | ${
+                  audits.interactive.displayValue
+                } |`,
+                `| ${score(audits["speed-index"].score * 100)} SpeedIndex | ${
+                  audits["speed-index"].displayValue
+                } |`,
+                `| ${score(
+                  audits["total-blocking-time"].score * 100
+                )} Total Blocking Time | ${audits["total-blocking-time"].displayValue} |`,
+                `| ${score(
+                  audits["largest-contentful-paint"].score * 100
+                )} Largest Contentful Pain | ${
+                  audits["largest-contentful-paint"].displayValue
+                } |`,
+                `| ${score(
+                  audits["cumulative-layout-shift"].score * 100
+                )} Cumulative Layout Shift | ${
+                  audits["cumulative-layout-shift"].displayValue
+                } |`,
+                " ",
+              ].join("\n");
+              comments += comment + "\n" + detail + "\n";
             });
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comments
-            })
+            core.setOutput('comments', comments)
+      - name: comment PR
+        uses: unsplash/comment-on-pr@v1.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          msg: ${{ steps.format_lighthouse_score.outputs.comments}}
+          check_for_duplicate_msg: false # OPTIONAL
+          delete_prev_regex_msg: "[0-9]" # OPTIONAL
+          duplicate_msg_pattern: "[A-Z]" # OPTIONAL
+      - name: deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.TOKEN }}
+          publish_dir: ./lhci_reports
+          keep_files: true
