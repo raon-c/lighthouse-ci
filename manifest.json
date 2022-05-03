@@ -1,0 +1,28 @@
+[
+  {
+    "url": "http://localhost:3000/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_-report.html",
+    "jsonPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_-report.json",
+    "summary": {
+      "performance": 1,
+      "accessibility": 0.97,
+      "best-practices": 1,
+      "seo": 1,
+      "pwa": 0.3
+    }
+  },
+  {
+    "url": "http://localhost:3000/ci",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_ci-report.html",
+    "jsonPath": "/home/runner/work/lighthouse-ci/lighthouse-ci/lhci_reports/_ci-report.json",
+    "summary": {
+      "performance": 0.99,
+      "accessibility": 0.92,
+      "best-practices": 1,
+      "seo": 0.82,
+      "pwa": 0.3
+    }
+  }
+]
