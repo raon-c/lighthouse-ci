@@ -39,12 +39,15 @@ jobs:
 
               const { audits } = details;
 
+              const parsedHtmlPath = htmlPath.split("/");
+              const path = parsedHtmlPath[parsedHtmlPath.length - 1];
+
               Object.keys(summary).forEach(
                 (key) => (summary[key] = formatResult(summary[key]))
               );
               const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
               const comment = [
-                `⚡️ Lighthouse report! ${url} score in this PR, See more [Detail](https://raon-c.github.io/lighthouse-ci/${htmlPath})`,
+                `⚡️ Lighthouse report! ${url} score in this PR, See more [Detail](https://raon-c.github.io/lighthouse-ci/${path})`,
                 "| Category | Score |",
                 "| --- | --- |",
                 `| ${score(summary.performance)} Performance | ${summary.performance} |`,

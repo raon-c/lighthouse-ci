@@ -5,11 +5,14 @@ const results = JSON.parse(fs.readFileSync("./lhci_reports/manifest.json"));
 let comments = "";
 
 results.forEach((result) => {
-  const { summary, url, jsonPath } = result;
+  const { summary, url, jsonPath, htmlPath } = result;
   const details = JSON.parse(fs.readFileSync(jsonPath));
   const formatResult = (res) => Math.round(res * 100);
 
   const { audits } = details;
+
+  const parsedHtmlPath = htmlPath.split("/");
+  const path = parsedHtmlPath[parsedHtmlPath.length - 1];
 
   Object.keys(summary).forEach(
     (key) => (summary[key] = formatResult(summary[key]))
