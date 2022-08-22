@@ -19,6 +19,7 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: |
           npm install -g @lhci/cli
+          npm install -g lighthouse puppeteer@3
           lhci autorun
       - name: Format lighthouse score
         id: format_lighthouse_score
@@ -26,6 +27,80 @@ jobs:
         with:
           github-token: ${{secrets.TOKEN}}
           script: |
+            const lighthouse = require('lighthouse');
+            const puppeteer = require('puppeteer');
+
+            const chromeLauncher = require('chrome-launcher');
+            const reportGenerator = require('lighthouse/report/generator/report-generator');
+            const request = require('request');
+            const util = require('util');
+
+            const options = {
+              logLevel: 'info',
+              disableDeviceEmulation: true,
+              chromeFlags: ['--disable-mobile-emulation'],
+            };
+
+            async function lighthouseFromPuppeteer(url, options, config = null) {
+              // Launch chrome using chrome-launcher
+              const chrome = await chromeLauncher.launch(options);
+              options.port = chrome.port || 12345;
+
+              // Connect chrome-launcher to puppeteer
+              const resp = await util.promisify(request)(
+                `http://localhost:${options.port}/json/version`,
+              );
+              const { webSocketDebuggerUrl } = JSON.parse(resp.body);
+              const browser = await puppeteer.connect({
+                browserWSEndpoint: webSocketDebuggerUrl,
+              });
+
+              // Run Lighthouse
+              const { lhr } = await lighthouse(url, options, config);
+              await browser.disconnect();
+              await chrome.kill();
+
+              const json = reportGenerator.generateReport(lhr, 'json');
+              const report = JSON.parse(json);
+
+              const audits = report.audits;
+              const categories = report.categories;
+
+              const performance = categories['performance'].score * 100;
+              const accessibility = categories['accessibility'].score * 100;
+              const bestPractices = categories['best-practices'].score * 100;
+              const seo = categories['seo'].score * 100;
+
+              const firstContentfulPaint = audits['first-contentful-paint'].displayValue;
+              const timeToInteractive = audits['interactive'].displayValue;
+              const speedIndex = audits['speed-index'].displayValue;
+              const totalBlockingTime = audits['total-blocking-time'].displayValue;
+              const largestContentfulPaint =
+                audits['largest-contentful-paint'].displayValue;
+              const cumulativeLayoutShift = audits['cumulative-layout-shift'].displayValue;
+
+              return {
+                categories: { performance, accessibility, bestPractices, seo },
+                audits: {
+                  firstContentfulPaint,
+                  timeToInteractive,
+                  speedIndex,
+                  totalBlockingTime,
+                  largestContentfulPaint,
+                  cumulativeLayoutShift,
+                },
+              };
+            }
+
+            const { categories, audits:testAudit } = lighthouseFromPuppeteer(
+              'http://localhost:3000/melon/offerwall?isLightMode=false',
+              options,
+            );
+
+            const testData = { categories, testAudit}
+
+
+
             const fs = require("fs");
 
             const results = JSON.parse(fs.readFileSync("./lhci_reports/manifest.json"));
@@ -93,12 +168,13 @@ jobs:
               comments += comment + "\n" + detail + "\n";
             });
             core.setOutput('comments', comments)
+            core.setOutput('test', testData)
       - name: comment PR
         uses: unsplash/comment-on-pr@v1.3.0
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          msg: ${{ steps.format_lighthouse_score.outputs.comments}}
+          msg: ${{ steps.format_lighthouse_score.outputs.comments, steps.format_lighthouse_score.outputs.testData }}
           check_for_duplicate_msg: false # OPTIONAL
           delete_prev_regex_msg: "[0-9]" # OPTIONAL
           duplicate_msg_pattern: "[A-Z]" # OPTIONAL
