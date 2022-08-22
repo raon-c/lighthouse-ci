@@ -10,11 +10,177 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 17.3.1
-      - name: npm install, run dev
+      - name: npm install, build
         run: |
           npm ci
-          npm run dev
-      - name: lighthosue-check
-        uses: foo-software/lighthouse-check-action@master
+          npm run build
+      - name: run Lighthouse CI
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+        run: |
+          npm install -g @lhci/cli
+          npm install -g lighthouse@9 puppeteer@3
+          lhci autorun
+      - name: Format lighthouse score
+        id: format_lighthouse_score
+        uses: actions/github-script@v3
         with:
-          urls: "http://localhost:3000"
+          github-token: ${{secrets.TOKEN}}
+          script: |
+            const lighthouse = require('lighthouse');
+            const puppeteer = require('puppeteer');
+
+            const chromeLauncher = require('chrome-launcher');
+            const reportGenerator = require('lighthouse/report/generator/report-generator');
+            const request = require('request');
+            const util = require('util');
+
+            const options = {
+              logLevel: 'info',
+              disableDeviceEmulation: true,
+              chromeFlags: ['--disable-mobile-emulation'],
+            };
+
+            async function lighthouseFromPuppeteer(url, options, config = null) {
+              // Launch chrome using chrome-launcher
+              const chrome = await chromeLauncher.launch(options);
+              options.port = chrome.port || 12345;
+
+              // Connect chrome-launcher to puppeteer
+              const resp = await util.promisify(request)(
+                `http://localhost:${options.port}/json/version`,
+              );
+              const { webSocketDebuggerUrl } = JSON.parse(resp.body);
+              const browser = await puppeteer.connect({
+                browserWSEndpoint: webSocketDebuggerUrl,
+              });
+
+              // Run Lighthouse
+              const { lhr } = await lighthouse(url, options, config);
+              await browser.disconnect();
+              await chrome.kill();
+
+              const json = reportGenerator.generateReport(lhr, 'json');
+              const report = JSON.parse(json);
+
+              const audits = report.audits;
+              const categories = report.categories;
+
+              const performance = categories['performance'].score * 100;
+              const accessibility = categories['accessibility'].score * 100;
+              const bestPractices = categories['best-practices'].score * 100;
+              const seo = categories['seo'].score * 100;
+
+              const firstContentfulPaint = audits['first-contentful-paint'].displayValue;
+              const timeToInteractive = audits['interactive'].displayValue;
+              const speedIndex = audits['speed-index'].displayValue;
+              const totalBlockingTime = audits['total-blocking-time'].displayValue;
+              const largestContentfulPaint =
+                audits['largest-contentful-paint'].displayValue;
+              const cumulativeLayoutShift = audits['cumulative-layout-shift'].displayValue;
+
+              return {
+                categories: { performance, accessibility, bestPractices, seo },
+                audits: {
+                  firstContentfulPaint,
+                  timeToInteractive,
+                  speedIndex,
+                  totalBlockingTime,
+                  largestContentfulPaint,
+                  cumulativeLayoutShift,
+                },
+              };
+            }
+
+            const { categories, audits:testAudit } = lighthouseFromPuppeteer(
+              'http://localhost:3000/melon/offerwall?isLightMode=false',
+              options,
+            );
+
+            const testData = { categories, testAudit}
+
+
+
+            const fs = require("fs");
+
+            const results = JSON.parse(fs.readFileSync("./lhci_reports/manifest.json"));
+
+            let comments = "";
+
+            results.forEach((result) => {
+              const { summary, url, jsonPath, htmlPath } = result;
+              const details = JSON.parse(fs.readFileSync(jsonPath));
+              const formatResult = (res) => Math.round(res * 100);
+
+              const { audits } = details;
+
+              const parsedHtmlPath = htmlPath.split("/");
+              const path = parsedHtmlPath[parsedHtmlPath.length - 1];
+
+              Object.keys(summary).forEach(
+                (key) => (summary[key] = formatResult(summary[key]))
+              );
+              const score = (res) => (res >= 90 ? "🟢" : res >= 50 ? "🟠" : "🔴");
+              const comment = [
+                `⚡️ Lighthouse report! ${url} score in this PR, See more [Detail](https://raon-c.github.io/lighthouse-ci/${path})`,
+                "| Category | Score |",
+                "| --- | --- |",
+                `| ${score(summary.performance)} Performance | ${summary.performance} |`,
+                `| ${score(summary.accessibility)} Accessibility | ${
+                  summary.accessibility
+                } |`,
+                `| ${score(summary["best-practices"])} Best practices | ${
+                  summary["best-practices"]
+                } |`,
+                `| ${score(summary.seo)} SEO | ${summary.seo} |`,
+                `| ${score(summary.pwa)} PWA | ${summary.pwa} |`,
+                " ",
+              ].join("\n");
+              const detail = [
+                "| Category | Score |",
+                "| --- | --- |",
+                `| ${score(
+                  audits["first-contentful-paint"].score * 100
+                )} First Contentful Pain | ${
+                  audits["first-contentful-paint"].displayValue
+                } |`,
+                `| ${score(audits.interactive.score * 100)} Time to Interactive | ${
+                  audits.interactive.displayValue
+                } |`,
+                `| ${score(audits["speed-index"].score * 100)} SpeedIndex | ${
+                  audits["speed-index"].displayValue
+                } |`,
+                `| ${score(
+                  audits["total-blocking-time"].score * 100
+                )} Total Blocking Time | ${audits["total-blocking-time"].displayValue} |`,
+                `| ${score(
+                  audits["largest-contentful-paint"].score * 100
+                )} Largest Contentful Pain | ${
+                  audits["largest-contentful-paint"].displayValue
+                } |`,
+                `| ${score(
+                  audits["cumulative-layout-shift"].score * 100
+                )} Cumulative Layout Shift | ${
+                  audits["cumulative-layout-shift"].displayValue
+                } |`,
+                " ",
+              ].join("\n");
+              comments += comment + "\n" + detail + "\n";
+            });
+            core.setOutput('comments', comments)
+            core.setOutput('test', testData)
+      - name: comment PR
+        uses: unsplash/comment-on-pr@v1.3.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          msg: ${{ steps.format_lighthouse_score.outputs.testData }}
+          check_for_duplicate_msg: false # OPTIONAL
+          delete_prev_regex_msg: "[0-9]" # OPTIONAL
+          duplicate_msg_pattern: "[A-Z]" # OPTIONAL
+      - name: deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.TOKEN }}
+          publish_dir: ./lhci_reports
+          keep_files: true
