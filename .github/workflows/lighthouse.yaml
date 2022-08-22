@@ -18,9 +18,7 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
         run: |
-          npm install -g @lhci/cli
           npm install -g lighthouse@9 puppeteer@3
-          lhci autorun
       - name: Format lighthouse score
         id: format_lighthouse_score
         uses: actions/github-script@v3
